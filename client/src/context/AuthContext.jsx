@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect } from 'react';
+import { api } from '../services/api';
 
 const AuthContext = createContext(null);
 
@@ -23,21 +24,16 @@ export function AuthProvider({ children }) {
       }
 
       try {
-        const res = await fetch('/api/auth/me', {
-          headers: {
-            Authorization: `Bearer ${savedToken}`,
-          },
-        });
-        const data = await res.json();
+        const data = await api.getMe();
         if (data.success && data.user) {
           setUser(data.user);
           localStorage.setItem('wpg_user', JSON.stringify(data.user));
         } else {
-          // Token expired or invalid
           logout();
         }
       } catch {
-        // Offline or connection error, keep local user state if present
+        // If server returns error or token expired, reset
+        logout();
       } finally {
         setLoading(false);
       }
@@ -47,15 +43,9 @@ export function AuthProvider({ children }) {
   }, []);
 
   const login = async (email, password) => {
-    const res = await fetch('/api/auth/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password }),
-    });
+    const data = await api.login({ email, password });
 
-    const data = await res.json();
-
-    if (!res.ok || !data.success) {
+    if (!data.success || !data.token) {
       throw new Error(data.error || 'Login failed. Please check your credentials.');
     }
 

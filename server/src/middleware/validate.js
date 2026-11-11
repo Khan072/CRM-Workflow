@@ -27,8 +27,8 @@ const validateCreateLead = [
     .trim()
     .notEmpty()
     .withMessage('Channel is required')
-    .isIn(['whatsapp', 'instagram'])
-    .withMessage('Channel must be whatsapp or instagram'),
+    .isIn(['whatsapp', 'instagram', 'facebook', 'website'])
+    .withMessage('Channel must be whatsapp, instagram, facebook, or website'),
   body('messageText')
     .trim()
     .notEmpty()

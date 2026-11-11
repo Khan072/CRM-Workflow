@@ -4,6 +4,8 @@ const {
   verifyWebhookSecret,
   handleWhatsApp,
   handleInstagram,
+  handleFacebook,
+  handleWebsite,
   webhookHealth,
 } = require('../controllers/webhookController');
 
@@ -18,5 +20,11 @@ router.post('/whatsapp', handleWhatsApp);
 
 // Instagram webhook — Make.com sends DMs here
 router.post('/instagram', handleInstagram);
+
+// Facebook webhook — Make.com / Meta sends messages here
+router.post('/facebook', handleFacebook);
+
+// Website webhook — Make.com or direct website forms/chat sends inquiries here
+router.post('/website', handleWebsite);
 
 module.exports = router;

@@ -1,6 +1,45 @@
 {
-  "customerName": "Test Lead",
-  "customerContact": "+91-1234567890",
-  "channel": "whatsapp",
-  "messageText": "I need 200 custom branded t-shirts for our company event next week. What are your prices?"
+  "_client": "Worth Prime Global — B2B Business Consulting & Company Formation (UAE & Saudi Arabia)",
+  "_comment": "Sample payloads for testing each Make.com webhook channel.",
+
+  "whatsapp": {
+    "_description": "Entrepreneur inquiring about Dubai company setup",
+    "from": "919876543210",
+    "name": "Arjun Mehta",
+    "message": "Hi, I want to set up a mainland company in Dubai for my IT consulting business. I need 2 investor visas and a corporate bank account. What is the total cost and timeline?",
+    "timestamp": "1700000000"
+  },
+
+  "instagram": {
+    "_description": "Prospect asking about free zone setup",
+    "username": "priya_startup",
+    "name": "Priya Kapoor",
+    "message": { "text": "I am planning to open a trading company in Dubai freezone. Need an investor visa and trade license. What packages do you offer?" },
+    "timestamp": "1700000001"
+  },
+
+  "facebook": {
+    "_description": "Partner/referral program inquiry",
+    "name": "James Okafor",
+    "sender": { "id": "1234567890" },
+    "message": { "text": "I am a business consultant in the UK with clients asking about UAE setup. Interested in your partner/referral program. Can we connect?" },
+    "timestamp": "1700000002"
+  },
+
+  "facebook_lead_ad": {
+    "_description": "Facebook Lead Ad — high-value DIFC inquiry",
+    "full_name": "Chen Wei",
+    "email": "chen.wei@horizoncapital.hk",
+    "phone_number": "+85291234567",
+    "message": "We are looking to set up a holding company in DIFC for our Middle East investment portfolio. Need a detailed proposal."
+  },
+
+  "website": {
+    "_description": "Website form — SaaS company expanding to GCC",
+    "name": "Sarah Al-Rashidi",
+    "email": "sarah@techventures.ae",
+    "phone": "+971-501234567",
+    "message": "We are a UK SaaS company expanding to the UAE. Need a freezone entity, VAT registration, and accounting support. Can we schedule a consultation call this week?",
+    "source": "contact_form"
+  }
 }

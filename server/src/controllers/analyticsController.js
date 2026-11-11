@@ -30,7 +30,7 @@ async function getSummary(req, res, next) {
     // Fill in missing stages/priorities/channels with 0
     const allStages = ['new', 'contacted', 'qualified', 'proposal', 'won', 'lost'];
     const allPriorities = ['low', 'medium', 'high'];
-    const allChannels = ['whatsapp', 'instagram'];
+    const allChannels = ['whatsapp', 'instagram', 'facebook', 'website'];
 
     const stageMap = Object.fromEntries(byStage.map((s) => [s._id, s.count]));
     const priorityMap = Object.fromEntries(byPriority.map((p) => [p._id, p.count]));

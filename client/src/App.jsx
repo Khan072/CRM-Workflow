@@ -1,6 +1,9 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { useState } from 'react';
+import { AuthProvider } from './context/AuthContext';
+import ProtectedRoute from './components/auth/ProtectedRoute';
 import Layout from './components/layout/Layout';
+import LoginPage from './pages/LoginPage';
 import LeadInbox from './pages/LeadInbox';
 import LeadDetail from './pages/LeadDetail';
 import Analytics from './pages/Analytics';
@@ -19,15 +22,60 @@ export default function App() {
 
   return (
     <BrowserRouter>
-      <Layout>
+      <AuthProvider>
         <Routes>
-          <Route path="/" element={<Navigate to="/inbox" replace />} />
-          <Route path="/inbox" element={<LeadInbox addToast={addToast} />} />
-          <Route path="/leads/:id" element={<LeadDetail addToast={addToast} />} />
-          <Route path="/analytics" element={<Analytics />} />
+          {/* Public Login Route */}
+          <Route path="/login" element={<LoginPage />} />
+
+          {/* Protected CRM Routes */}
+          <Route
+            path="/"
+            element={
+              <ProtectedRoute>
+                <Navigate to="/inbox" replace />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/inbox"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <LeadInbox addToast={addToast} />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/leads/:id"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <LeadDetail addToast={addToast} />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/analytics"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <Analytics />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Fallback */}
+          <Route path="*" element={<Navigate to="/inbox" replace />} />
         </Routes>
-      </Layout>
-      <ToastContainer toasts={toasts} />
+
+        <ToastContainer toasts={toasts} />
+      </AuthProvider>
     </BrowserRouter>
   );
 }

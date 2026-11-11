@@ -93,7 +93,7 @@ const leadSchema = new mongoose.Schema({
   },
   channel: {
     type: String,
-    enum: ['whatsapp', 'instagram'],
+    enum: ['whatsapp', 'instagram', 'facebook', 'website'],
     required: [true, 'Channel is required'],
   },
   stage: {

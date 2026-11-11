@@ -1,57 +1,68 @@
 /**
- * Sample customer messages for demonstrating the CRM workflow.
- * Each covers a different edge case or scenario.
+ * Sample customer messages for Worth Prime Global CRM demo.
+ *
+ * Worth Prime Global: B2B business consulting & company formation firm
+ * specializing in UAE (Dubai/Abu Dhabi) and Saudi Arabia (Riyadh/Jeddah) setups.
+ *
+ * Each message covers a different service, intent type, and lead quality scenario.
  */
 
 const sampleMessages = [
   {
-    customerName: 'Rahul Sharma',
+    customerName: 'Arjun Mehta',
     customerContact: '+91-9876543210',
     channel: 'whatsapp',
-    messageText: 'Hi, I need around 500 custom T-shirts for my company event next month. Please share the price and delivery time.',
-    description: 'Ideal lead — specific product, quantity, timeline, pricing intent',
+    messageText: 'Hi, I want to set up a mainland company in Dubai for my IT consulting business. I need 2 investor visas and a corporate bank account as well. What is the total cost and how long does the process take?',
+    description: 'High-quality lead — specific service (mainland setup + visas + banking), jurisdiction, activity, and pricing intent',
   },
   {
-    customerName: 'Priya Patel',
-    customerContact: 'priya.patel@email.com',
-    channel: 'instagram',
+    customerName: 'Sarah Al-Rashidi',
+    customerContact: 'sarah@techventures.ae',
+    channel: 'website',
+    messageText: 'We are a UK-based SaaS company looking to expand into the GCC market. We are interested in setting up a free zone entity in Dubai that allows 100% foreign ownership. We also need help with VAT registration and accounting. Can we schedule a consultation call this week?',
+    description: 'Ideal B2B lead — multiple services, jurisdiction preference, timeline, consultation request, business email',
+  },
+  {
+    customerName: 'Faisal Al-Amer',
+    customerContact: '+966-501234567',
+    channel: 'whatsapp',
     messageText: 'Hi',
     description: 'Edge case — vague greeting with no useful information',
   },
   {
-    customerName: 'Amit Kumar',
+    customerName: 'Priya Kapoor',
     customerContact: '+91-9988776655',
-    channel: 'whatsapp',
-    messageText: 'Hello! I am looking for custom hoodies and caps for my startup team. We need about 50 hoodies in dark blue and 50 caps with our logo. Can you also do custom packaging for these? We need everything delivered by next week.',
-    description: 'Multi-product inquiry with urgency and customization details',
-  },
-  {
-    customerName: 'Sneha Reddy',
-    customerContact: 'sneha.r@company.co',
     channel: 'instagram',
-    messageText: 'I placed an order for 200 mugs last week (Order #MUG-2024-089) but received only 180. Some of them also have printing defects. Please help resolve this issue urgently.',
-    description: 'Support request — not a purchase inquiry, tests intent classification',
+    messageText: 'I am an Indian entrepreneur planning to move to Dubai and start a trading company. I need an investor visa for myself, one for my business partner, and a trade license. What packages do you offer and what is the timeline?',
+    description: 'Multi-service inquiry — company setup + 2 visas + license, timeline asked, good detail level',
   },
   {
-    customerName: 'Vikram Singh',
-    customerContact: '+91-7766554433',
-    channel: 'whatsapp',
-    messageText: 'We spoke last Tuesday about the corporate jersey order for our cricket team. Just following up — have you prepared the quote yet? We need to finalize by this Friday.',
-    description: 'Follow-up message with deadline pressure',
+    customerName: 'James Okafor',
+    customerContact: 'james.okafor@globalpartners.co',
+    channel: 'website',
+    messageText: 'I represent a UK law firm specialising in cross-border transactions. We regularly have clients asking about UAE and Saudi business setup. I am interested in learning more about your partner referral program and how we can collaborate on a revenue-share basis.',
+    description: 'Partnership inquiry — referral program, B2B law firm, high-value potential partner',
   },
   {
-    customerName: 'Ananya Desai',
-    customerContact: '',
-    channel: 'instagram',
-    messageText: 'Your designs look amazing! Can you tell me more about your custom tote bags? I might be interested in ordering some for my boutique.',
-    description: 'Casual product inquiry — no quantity, no urgency, no contact info',
+    customerName: 'Mohammed Al-Zahrani',
+    customerContact: '+966-559876543',
+    channel: 'facebook',
+    messageText: 'I already submitted my documents for the company registration in Riyadh 3 weeks ago. I haven\'t received any update. Can someone check the status of my application? This is urgent as my investor visa depends on it.',
+    description: 'Follow-up / support case — existing client needing status update, high urgency',
   },
   {
-    customerName: 'Rajesh Verma',
+    customerName: 'Ravi Shankar',
     customerContact: '+91-8899001122',
     channel: 'whatsapp',
-    messageText: 'URGENT: Need 1000 branded pens and 500 flyers for a trade show happening day after tomorrow. Can you handle rush orders? Budget is not an issue but quality must be premium. Also need a banner 10ft x 4ft. Please confirm ASAP.',
-    description: 'High-urgency multi-product order with budget signal and tight deadline',
+    messageText: 'URGENT: I need to set up an offshore company in UAE by end of this month for a contract I am signing. The client requires a UAE registered entity. What is the fastest option available? Budget is flexible but need it done in 2 weeks.',
+    description: 'High-urgency offshore setup, deadline pressure, budget flexibility, fast-track required',
+  },
+  {
+    customerName: 'Chen Wei',
+    customerContact: 'chen.wei@horizoncapital.hk',
+    channel: 'website',
+    messageText: 'We are a Hong Kong-based investment fund exploring setting up a holding company in the DIFC or ADGM to manage our Middle East investments. We need guidance on the regulatory framework, annual costs, and whether a family office structure would be appropriate for our requirements. Can you send a detailed proposal?',
+    description: 'High-value enterprise inquiry — DIFC/ADGM holding company, family office, formal proposal requested',
   },
 ];
 

@@ -1,6 +1,6 @@
-# LeadFlow CRM — AI-Powered WhatsApp/Instagram Lead Workflow
+# LeadFlow CRM — Omnichannel AI-Powered Lead Workflow
 
-A production-quality CRM mini-feature that converts incoming WhatsApp and Instagram customer messages into structured leads with AI-powered analysis, intelligent lead scoring, next-action recommendations, and conversation history.
+A production-quality CRM mini-feature that converts incoming customer messages across WhatsApp, Instagram, Facebook, and Website inquiry channels into structured leads with AI-powered analysis, intelligent lead scoring, next-action recommendations, and conversation history.
 
 ![Stack](https://img.shields.io/badge/React-19-blue) ![Stack](https://img.shields.io/badge/Express-4-green) ![Stack](https://img.shields.io/badge/MongoDB-8-darkgreen) ![Stack](https://img.shields.io/badge/AI-Gemini_2.0_Flash-purple)
 
@@ -27,6 +27,15 @@ A production-quality CRM mini-feature that converts incoming WhatsApp and Instag
 
 - **Node.js** ≥ 18
 - **MongoDB** running locally on port 27017 (or a MongoDB Atlas connection string)
+
+### Default Login Credentials
+
+| Role | Email | Password |
+|---|---|---|
+| **Executive Admin** | `admin@worthprimeglobal.com` | `admin123` |
+| **Sales Advisor** | `sales@worthprimeglobal.com` | `sales123` |
+
+*(You can also use the 1-Click Demo buttons on the login page to sign in instantly without typing)*
 
 ### Installation
 
@@ -97,7 +106,7 @@ The AI receives a **system prompt** that establishes it as a "CRM sales assistan
 
 The **user prompt** sends only:
 - Message text
-- Channel (whatsapp/instagram)
+- Channel (whatsapp/instagram/facebook/website)
 - Customer name (for personalized replies)
 
 **No PII (phone, email, address) is sent to the AI** — only the message content and name.
@@ -144,7 +153,7 @@ Each factor contributes a weighted amount to the total score:
 | **Purchase Intent** | 20 | Purchase request = 100%, pricing = 85%, inquiry = 60%, greeting = 0% |
 | **Contact Info** | 10 | Phone or email was provided |
 | **Message Detail** | 10 | Based on word count (≥30 words = full, ≥15 = 60%) |
-| **Channel Quality** | 10 | WhatsApp = 100%, Instagram = 70% |
+| **Channel Quality** | 10 | WhatsApp = 100%, Website = 90%, Facebook/Instagram = 70% |
 
 ### Score → Priority Mapping
 
@@ -187,11 +196,19 @@ Each factor contributes a weighted amount to the total score:
 | `POST` | `/api/leads/:id/reply` | Save sent reply to activity log |
 | `GET` | `/api/leads/check-duplicate` | Check for duplicate (query: `customerContact`, `customerName`, `channel`) |
 
-### Analytics Endpoints
-
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | `GET` | `/api/analytics/summary` | Aggregated stats: by stage, priority, channel, avg score |
+
+### Webhook Endpoints (Make.com / Direct Ingestion)
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/api/webhook/health` | Webhook health check and endpoint directory |
+| `POST` | `/api/webhook/whatsapp` | Ingest WhatsApp messages |
+| `POST` | `/api/webhook/instagram` | Ingest Instagram DMs |
+| `POST` | `/api/webhook/facebook` | Ingest Facebook Messenger & Lead Ad messages |
+| `POST` | `/api/webhook/website` | Ingest Website contact form and chat inquiries |
 
 ### Example Request
 
@@ -221,6 +238,8 @@ The seed script (`npm run seed`) creates 7 sample leads covering different scena
 | Vikram Singh | Follow-up — referencing previous conversation | Intent: follow_up, moderate score |
 | Ananya Desai | Casual inquiry — no quantity, no contact info | Medium score, Contacted stage |
 | Rajesh Verma | URGENT multi-product rush order | Highest score, Proposal stage, urgency: high |
+| Karan Mehra | Facebook Ad inquiry — bulk polo shirts & bottles | High score, discount intent |
+| Meera Nambiar | Website contact form — laptops sleeves & bags | High score, B2B lead with deadline |
 
 ---
 
@@ -254,7 +273,7 @@ The seed script (`npm run seed`) creates 7 sample leads covering different scena
 
 6. **Non-linear stage progression** — Stages can be set manually in any order. A lead can jump from "New" to "Proposal" if the message warrants it. This reflects real sales: customers sometimes arrive ready to buy.
 
-7. **Channel quality scoring** — WhatsApp scores slightly higher than Instagram (10 vs 7 points). Reasoning: WhatsApp messages tend to indicate more direct purchase intent, while Instagram inquiries are often more exploratory.
+7. **Channel quality scoring** — WhatsApp and Website inquiries score higher (10 and 9 points) than Facebook/Instagram (7 points). Reasoning: WhatsApp and direct website forms tend to indicate high purchase intent, while social media inquiries can sometimes be exploratory.
 
 8. **Auto-stage advancement** — When a salesperson sends a reply, a "New" lead auto-advances to "Contacted". All other stage transitions are manual or AI-suggested.
 

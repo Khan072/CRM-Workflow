@@ -5,6 +5,8 @@ const connectDB = require('./config/db');
 const leadRoutes = require('./routes/leadRoutes');
 const analyticsRoutes = require('./routes/analyticsRoutes');
 const webhookRoutes = require('./routes/webhookRoutes');
+const authRoutes = require('./routes/authRoutes');
+const { ensureDefaultUsers } = require('./controllers/authController');
 const errorHandler = require('./middleware/errorHandler');
 
 const app = express();
@@ -15,6 +17,7 @@ app.use(cors());
 app.use(express.json({ limit: '10kb' }));
 
 // Routes
+app.use('/api/auth', authRoutes);
 app.use('/api/leads', leadRoutes);
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/webhook', webhookRoutes);
@@ -30,6 +33,7 @@ app.use(errorHandler);
 // Start server
 async function start() {
   await connectDB();
+  await ensureDefaultUsers();
   app.listen(PORT, () => {
     console.log(`CRM Server running on http://localhost:${PORT}`);
     console.log(`AI Provider: ${process.env.GEMINI_API_KEY ? 'Google Gemini' : 'Mock AI (set GEMINI_API_KEY for real AI)'}`);

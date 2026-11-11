@@ -1,0 +1,21 @@
+# ─── Server Dockerfile ───────────────────────────────────────────────────────
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Copy package files first for layer caching
+COPY server/package*.json ./
+
+RUN npm install --production
+
+# Copy server source
+COPY server/src ./src
+
+# Expose backend port
+EXPOSE 5000
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=15s \
+  CMD wget -qO- http://localhost:5000/api/health || exit 1
+
+CMD ["node", "src/index.js"]

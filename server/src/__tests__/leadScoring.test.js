@@ -71,6 +71,25 @@ describe('Lead Scoring Service', () => {
       expect(waBreakdown.channelQuality).toBeGreaterThan(igBreakdown.channelQuality);
     });
 
+    test('Website and Facebook channels have appropriate quality scores', () => {
+      const analysis = {
+        intent: 'product_inquiry',
+        products: ['Bags'],
+        quantity: '',
+        urgency: 'low',
+      };
+      const message = 'I am interested in your bags.';
+
+      const { breakdown: webBreakdown } = calculateScore(analysis, message, 'website', false);
+      const { breakdown: fbBreakdown } = calculateScore(analysis, message, 'facebook', false);
+      const { breakdown: igBreakdown } = calculateScore(analysis, message, 'instagram', false);
+      
+      expect(webBreakdown.channelQuality).toBe(9);
+      expect(fbBreakdown.channelQuality).toBe(7);
+      expect(igBreakdown.channelQuality).toBe(7);
+      expect(webBreakdown.channelQuality).toBeGreaterThan(fbBreakdown.channelQuality);
+    });
+
     test('medium urgency scores less than high urgency', () => {
       const high = { intent: 'purchase_request', products: ['T-Shirts'], quantity: '100', urgency: 'high' };
       const medium = { intent: 'purchase_request', products: ['T-Shirts'], quantity: '100', urgency: 'medium' };

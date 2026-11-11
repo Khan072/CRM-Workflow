@@ -21,6 +21,8 @@ const PRIORITY_COLORS = {
 const CHANNEL_COLORS = {
   whatsapp: '#25d366',
   instagram: '#e1306c',
+  facebook: '#1877f2',
+  website: '#0ea5e9',
 };
 
 function BarChart({ data, labelKey, valueKey, colorMap, maxValue }) {

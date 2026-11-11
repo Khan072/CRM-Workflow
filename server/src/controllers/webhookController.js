@@ -66,13 +66,62 @@ function normalizeInstagramPayload(body) {
 }
 
 /**
- * Core logic: Create or update a lead from normalized data.
- * Shared by both WhatsApp and Instagram webhook handlers.
+ * Normalize payload from Make.com or Meta Webhook for Facebook messages.
+ *
+ * Supported formats:
+ * {
+ *   "name": "Anil Kapoor",
+ *   "from": "anil.k@facebook.com", // or phone or facebook_id
+ *   "message": "Interested in bulk ordering corporate t-shirts",
+ *   "channel": "facebook"
+ * }
  */
-async function processIncomingMessage({ customerName, customerContact, channel, messageText }) {
-  if (!messageText || messageText.trim() === '') {
+function normalizeFacebookPayload(body) {
+  return {
+    customerName: body.name || body.customerName || body.sender_name || body.full_name || 'Unknown',
+    customerContact: body.from || body.phone || body.email || body.facebook_id || body.sender_id || body.customerContact || '',
+    channel: 'facebook',
+    messageText: body.message || body.text || body.messageText || '',
+  };
+}
+
+/**
+ * Normalize payload from Website contact forms, lead widgets, or live chats.
+ *
+ * Supported formats:
+ * {
+ *   "name": "Sarah Jenkins",
+ *   "email": "sarah@company.com",
+ *   "phone": "+91-9876543210",
+ *   "message": "Looking for custom hoodies with our company logo",
+ *   "channel": "website"
+ * }
+ */
+function normalizeWebsitePayload(body) {
+  return {
+    customerName: body.name || body.customerName || body.fullName || 'Unknown',
+    customerContact: body.email || body.phone || body.contact || body.from || body.customerContact || '',
+    channel: 'website',
+    messageText: body.message || body.text || body.messageText || body.inquiry || '',
+  };
+}
+
+/**
+ * Core logic: Create or update a lead from normalized data.
+ * Shared by all webhook handlers (WhatsApp, Instagram, Facebook, Website).
+ */
+async function processIncomingMessage({ customerName, customerContact, channel, messageText, _makecomMessageId, _makecomTimestamp, _source }) {
+  // Coerce messageText to string — guards against nested objects slipping through normalizers
+  const text = typeof messageText === 'object'
+    ? (messageText?.text || messageText?.body || JSON.stringify(messageText))
+    : String(messageText || '');
+
+  if (!text || text.trim() === '') {
     throw new Error('Empty message — skipped');
   }
+
+  // Use normalised text from here on
+  const resolvedText = text;
 
   // Check for duplicate lead by contact
   if (customerContact) {
@@ -83,12 +132,12 @@ async function processIncomingMessage({ customerName, customerContact, channel, 
       // Append new message to existing lead
       existingLead.activities.push({
         type: 'message_received',
-        content: { text: messageText, channel },
+        content: { text: resolvedText, channel },
         actor: 'customer',
       });
 
       // Re-analyze with latest message
-      const aiAnalysis = await aiService.analyzeMessage(messageText, channel, customerName);
+      const aiAnalysis = await aiService.analyzeMessage(resolvedText, channel, customerName);
       const { _aiProvider, _aiError, ...cleanAnalysis } = aiAnalysis;
 
       existingLead.aiAnalysis = cleanAnalysis;
@@ -103,7 +152,7 @@ async function processIncomingMessage({ customerName, customerContact, channel, 
       });
 
       // Recalculate score
-      const { score, breakdown } = calculateScore(cleanAnalysis, messageText, channel, !!customerContact);
+      const { score, breakdown } = calculateScore(cleanAnalysis, resolvedText, channel, !!customerContact);
       existingLead.leadScore = score;
       existingLead.scoreBreakdown = breakdown;
       existingLead.priority = scoreToPriority(score);
@@ -115,11 +164,11 @@ async function processIncomingMessage({ customerName, customerContact, channel, 
   }
 
   // AI Analysis for new lead
-  const aiAnalysis = await aiService.analyzeMessage(messageText, channel, customerName);
+  const aiAnalysis = await aiService.analyzeMessage(resolvedText, channel, customerName);
   const { _aiProvider, _aiError, ...cleanAnalysis } = aiAnalysis;
 
   // Calculate lead score
-  const { score, breakdown } = calculateScore(cleanAnalysis, messageText, channel, !!customerContact);
+  const { score, breakdown } = calculateScore(cleanAnalysis, resolvedText, channel, !!customerContact);
   const priority = scoreToPriority(score);
   const stage = scoreToStage(score, cleanAnalysis.intent);
 
@@ -133,7 +182,7 @@ async function processIncomingMessage({ customerName, customerContact, channel, 
     leadScore: score,
     scoreBreakdown: breakdown,
     aiAnalysis: cleanAnalysis,
-    originalMessage: messageText,
+    originalMessage: resolvedText,
     activities: [
       {
         type: 'lead_created',
@@ -142,7 +191,7 @@ async function processIncomingMessage({ customerName, customerContact, channel, 
       },
       {
         type: 'message_received',
-        content: { text: messageText, channel },
+        content: { text: resolvedText, channel },
         actor: 'customer',
       },
       {
@@ -245,16 +294,101 @@ async function handleInstagram(req, res, next) {
 }
 
 /**
+ * POST /api/webhook/facebook
+ * Receives Facebook Messenger / Lead Ad messages forwarded by Make.com or Meta Webhooks.
+ */
+async function handleFacebook(req, res, next) {
+  try {
+    console.log('[Webhook] Facebook message received from Make.com/Meta:', JSON.stringify(req.body));
+
+    const normalized = normalizeFacebookPayload(req.body);
+
+    if (!normalized.messageText) {
+      return res.status(400).json({
+        success: false,
+        error: 'Message text is required (field: message or text)',
+      });
+    }
+
+    const { lead, isDuplicate } = await processIncomingMessage(normalized);
+
+    console.log(`[Webhook] Facebook lead ${isDuplicate ? 'updated' : 'created'}: ${lead._id}`);
+
+    res.status(isDuplicate ? 200 : 201).json({
+      success: true,
+      data: {
+        leadId: lead._id,
+        customerName: lead.customerName,
+        stage: lead.stage,
+        leadScore: lead.leadScore,
+        priority: lead.priority,
+      },
+      isDuplicate,
+      message: isDuplicate
+        ? 'New message added to existing lead'
+        : 'New lead created from Facebook message',
+    });
+  } catch (error) {
+    console.error('[Webhook] Facebook error:', error.message);
+    next(error);
+  }
+}
+
+/**
+ * POST /api/webhook/website
+ * Receives Website contact forms or chat widget submissions forwarded by Make.com or web form.
+ */
+async function handleWebsite(req, res, next) {
+  try {
+    console.log('[Webhook] Website inquiry received:', JSON.stringify(req.body));
+
+    const normalized = normalizeWebsitePayload(req.body);
+
+    if (!normalized.messageText) {
+      return res.status(400).json({
+        success: false,
+        error: 'Message text is required (field: message, text, or inquiry)',
+      });
+    }
+
+    const { lead, isDuplicate } = await processIncomingMessage(normalized);
+
+    console.log(`[Webhook] Website lead ${isDuplicate ? 'updated' : 'created'}: ${lead._id}`);
+
+    res.status(isDuplicate ? 200 : 201).json({
+      success: true,
+      data: {
+        leadId: lead._id,
+        customerName: lead.customerName,
+        stage: lead.stage,
+        leadScore: lead.leadScore,
+        priority: lead.priority,
+      },
+      isDuplicate,
+      message: isDuplicate
+        ? 'New message added to existing lead'
+        : 'New lead created from Website inquiry',
+    });
+  } catch (error) {
+    console.error('[Webhook] Website error:', error.message);
+    next(error);
+  }
+}
+
+/**
  * GET /api/webhook/health
  * Make.com connection test endpoint.
  */
 function webhookHealth(req, res) {
   res.json({
     success: true,
-    message: 'CRM Webhook is active and ready',
+    message: 'Worth Prime Global CRM Webhook is active and ready',
+    client: 'Worth Prime Global — Business Setup & Consulting | UAE & Saudi Arabia',
     endpoints: {
       whatsapp: 'POST /api/webhook/whatsapp',
       instagram: 'POST /api/webhook/instagram',
+      facebook: 'POST /api/webhook/facebook',
+      website: 'POST /api/webhook/website',
     },
     timestamp: new Date().toISOString(),
   });
@@ -264,5 +398,7 @@ module.exports = {
   verifyWebhookSecret,
   handleWhatsApp,
   handleInstagram,
+  handleFacebook,
+  handleWebsite,
   webhookHealth,
 };

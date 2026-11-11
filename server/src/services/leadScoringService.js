@@ -4,24 +4,30 @@
  * Score 0-100, calculated from weighted factors.
  * Each factor's contribution is visible in the scoreBreakdown.
  * Business owners can adjust weights to match their sales process.
+ *
+ * Tuned for Worth Prime Global — B2B international trade & consulting.
+ * Key signals: service/solution interest, budget/project size, decision-maker contact,
+ * business context, and timeline. Quantity is less relevant; replaced by project scope.
  */
 
-// Weights are configurable — these are sensible defaults for a B2B custom product business
+// Weights tuned for B2B professional services / international trade
 const WEIGHTS = {
-  hasProduct: 20,      // Customer mentioned a specific product/service
-  hasQuantity: 15,     // Customer mentioned a quantity
-  hasTimeline: 15,     // Customer mentioned a deadline or timeline
-  intentSignal: 20,    // Purchase/pricing intent vs. support/greeting
-  hasContactInfo: 10,  // Customer provided phone/email
-  messageRichness: 10, // Message length and detail level
-  channelQuality: 10,  // Channel signal (WhatsApp tends to be more direct)
+  hasProduct: 20,      // Customer mentioned a specific service or solution area
+  hasQuantity: 10,     // Project scale/scope mentioned (team size, volume, budget range)
+  hasTimeline: 15,     // Project deadline or start date mentioned
+  intentSignal: 25,    // Inquiry/proposal/partnership intent vs. support/greeting (higher weight for B2B)
+  hasContactInfo: 15,  // Business email / phone / company name (higher weight — B2B lead quality signal)
+  messageRichness: 10, // Message detail level (B2B buyers write longer, more specific messages)
+  channelQuality: 5,   // Channel signal (website/email = higher intent for B2B)
 };
 
-// Intent → signal strength mapping
+// Intent → signal strength mapping (B2B: partnership/consultation = high value)
 const INTENT_SCORES = {
-  purchase_request: 1.0,
-  pricing_inquiry: 0.85,
-  product_inquiry: 0.6,
+  purchase_request: 1.0,       // Direct request for service/solution
+  pricing_inquiry: 0.85,       // Asking for quotes/proposals
+  product_inquiry: 0.65,       // Exploring services/solutions
+  partnership_inquiry: 0.9,    // B2B partnership / collaboration interest
+  consultation_request: 0.95,  // Requesting a call/meeting — very high B2B signal
   follow_up: 0.5,
   general_inquiry: 0.3,
   support: 0.15,
@@ -48,7 +54,7 @@ function calculateScore(aiAnalysis, messageText, channel, hasContactInfo = false
     breakdown.hasProduct = WEIGHTS.hasProduct;
   }
 
-  // Factor 2: Quantity mentioned
+  // Factor 2: Project scope / scale mentioned (replaces raw "quantity" for B2B)
   if (aiAnalysis.quantity && aiAnalysis.quantity.trim() !== '') {
     breakdown.hasQuantity = WEIGHTS.hasQuantity;
   }
@@ -79,11 +85,13 @@ function calculateScore(aiAnalysis, messageText, channel, hasContactInfo = false
     breakdown.messageRichness = Math.round(WEIGHTS.messageRichness * 0.3);
   }
 
-  // Factor 7: Channel quality
-  if (channel === 'whatsapp') {
-    breakdown.channelQuality = WEIGHTS.channelQuality;
-  } else if (channel === 'instagram') {
-    breakdown.channelQuality = Math.round(WEIGHTS.channelQuality * 0.7);
+  // Factor 7: Channel quality — for B2B, website form = highest intent signal
+  if (channel === 'website') {
+    breakdown.channelQuality = WEIGHTS.channelQuality;        // Website form = most deliberate B2B action
+  } else if (channel === 'whatsapp') {
+    breakdown.channelQuality = Math.round(WEIGHTS.channelQuality * 0.9); // Direct messaging = high intent
+  } else if (channel === 'facebook' || channel === 'instagram') {
+    breakdown.channelQuality = Math.round(WEIGHTS.channelQuality * 0.6); // Social = lower B2B intent
   }
 
   const totalScore = Object.values(breakdown).reduce((sum, val) => sum + val, 0);
@@ -105,16 +113,19 @@ function scoreToPriority(score) {
 
 /**
  * Map score + intent to an appropriate CRM stage.
- * Logic:
- * - Greeting/no info → "new" (not enough to act on)
- * - Product interest but missing details → "contacted" (need more info)
- * - Product + quantity + timeline → "qualified" (sales-ready)
- * - Explicit purchase intent with details → "proposal" (ready to quote)
+ * Logic for B2B consulting / company formation:
+ * - Greeting/no info     → "new"       (not enough to act on)
+ * - General service ask  → "contacted" (needs qualification call)
+ * - Specific service +
+ *   company context      → "qualified" (ready for proposal)
+ * - Explicit consultation/
+ *   proposal request     → "proposal"  (send formal proposal / schedule meeting)
  */
 function scoreToStage(score, intent) {
   if (intent === 'greeting' || intent === 'unknown') return 'new';
-  if (intent === 'support') return 'new'; // Support ≠ sales lead, but track it
-  if (intent === 'purchase_request' && score >= 50) return 'proposal';
+  if (intent === 'support') return 'new';
+  if ((intent === 'consultation_request' || intent === 'purchase_request') && score >= 50) return 'proposal';
+  if (intent === 'partnership_inquiry' && score >= 40) return 'qualified';
   if (score >= 50) return 'qualified';
   if (score >= 25) return 'contacted';
   return 'new';

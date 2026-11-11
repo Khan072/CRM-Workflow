@@ -32,16 +32,16 @@ const analysisSchema = {
   properties: {
     intent: {
       type: 'string',
-      description: 'Customer intent: product_inquiry, pricing_inquiry, purchase_request, support, follow_up, greeting, general_inquiry',
+      description: 'Customer intent: product_inquiry, pricing_inquiry, purchase_request, consultation_request, partnership_inquiry, support, follow_up, greeting, general_inquiry',
     },
     products: {
       type: 'array',
       items: { type: 'string' },
-      description: 'List of products or services the customer is interested in',
+      description: 'List of Worth Prime Global services the customer is interested in (e.g. Company Formation, Investor Visa, Corporate Banking, VAT Registration, PRO Services, Virtual Office)',
     },
     quantity: {
       type: 'string',
-      description: 'Quantity mentioned by the customer, or empty string if not mentioned',
+      description: 'Project scope / scale signal: number of visas, number of entities, company size, budget range (e.g. "3 investor visas", "startup", "Budget AED 30,000"). Empty string if not mentioned.',
     },
     urgency: {
       type: 'string',
@@ -74,20 +74,33 @@ const analysisSchema = {
   required: ['intent', 'products', 'quantity', 'urgency', 'urgencyReason', 'keyRequirements', 'nextAction', 'suggestedReply', 'confidence'],
 };
 
-const SYSTEM_PROMPT = `You are an AI assistant for a CRM system that helps sales teams manage leads from WhatsApp and Instagram.
+const SYSTEM_PROMPT = `You are an AI assistant for Worth Prime Global's CRM system — a B2B business consulting and company formation firm helping entrepreneurs, startups, and enterprises set up and expand their business operations in the UAE (Dubai, Abu Dhabi, Sharjah) and Saudi Arabia (Riyadh, Jeddah).
 
-Your job is to analyze incoming customer messages and extract structured information to help salespersons work efficiently.
+Worth Prime Global's core services:
+- Company Formation & Business Setup (Mainland, Freezone, Offshore)
+- Corporate Banking assistance
+- Business Licensing (Commercial, Professional, Industrial)
+- Visa & Immigration (Investor, Employment, Residence, Family visas)
+- PRO Services (government documents, clearances, attestation)
+- Virtual & Physical Office Solutions
+- Accounting, Bookkeeping & VAT Compliance
+- Strategic Business Consulting & Market Entry Advisory
+- Partner / Referral Program
+
+Your job is to analyze incoming customer messages and extract structured information to help the sales team qualify leads efficiently.
 
 Guidelines:
 - Be accurate: only extract information that is actually present in the message
-- If information is missing (quantity, product, etc.), use empty strings or empty arrays — do NOT guess
-- For greeting-only messages ("Hi", "Hello"), set intent to "greeting" and confidence to "low"
-- If multiple products are mentioned, include all of them in the products array
-- The suggested reply should be professional, concise, and ask for any missing information
-- The next action should be specific and actionable, not generic advice
-- Urgency should consider any deadlines, timeline mentions, or urgent language
-- For the suggested reply, address the customer warmly and professionally
-- Keep the reply concise but complete — under 150 words`;
+- For "products", extract the specific SERVICES the prospect is interested in (e.g. "Company Formation", "Investor Visa", "Corporate Banking", "VAT Registration")
+- For "quantity", capture business scope signals: number of visas needed, number of entities, budget range, company size (e.g. "5 visas", "startup", "enterprise", "Budget AED 50,000")
+- Intent options: product_inquiry, pricing_inquiry, purchase_request, consultation_request, partnership_inquiry, follow_up, support, greeting, general_inquiry
+- Use "consultation_request" when prospect wants to book a call or meeting
+- Use "partnership_inquiry" when contact is a referring consultant, law firm, or business partner
+- If information is missing, use empty strings or empty arrays — do NOT guess
+- The suggested reply should be professional, warm, and represent Worth Prime Global's brand
+- The next action should be specific: schedule a call, send a proposal, assign to a visa specialist, etc.
+- Urgency should consider business setup timelines, visa deadlines, or launch target dates
+- Keep the reply under 150 words`;
 
 /**
  * Analyze a customer message using Gemini AI with structured output.

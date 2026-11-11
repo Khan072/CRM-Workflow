@@ -57,6 +57,8 @@
   /* Channel colors */
   --channel-whatsapp: #25d366;
   --channel-instagram: #e1306c;
+  --channel-facebook: #1877f2;
+  --channel-website: #0ea5e9;
 
   /* Spacing */
   --space-xs: 4px;
@@ -558,6 +560,16 @@ a:hover {
   color: var(--channel-instagram);
 }
 
+.badge-channel-facebook {
+  background: rgba(24, 119, 242, 0.12);
+  color: var(--channel-facebook);
+}
+
+.badge-channel-website {
+  background: rgba(14, 165, 233, 0.12);
+  color: var(--channel-website);
+}
+
 .badge-ai {
   background: var(--accent-glow);
   color: var(--accent-primary-hover);
@@ -629,8 +641,15 @@ a:hover {
 
 /* Channel selector buttons */
 .channel-selector {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
   gap: var(--space-sm);
+}
+
+@media (max-width: 520px) {
+  .channel-selector {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
 .channel-btn {
@@ -665,6 +684,18 @@ a:hover {
   border-color: var(--channel-instagram);
   background: rgba(225, 48, 108, 0.1);
   color: var(--channel-instagram);
+}
+
+.channel-btn.active-facebook {
+  border-color: var(--channel-facebook);
+  background: rgba(24, 119, 242, 0.1);
+  color: var(--channel-facebook);
+}
+
+.channel-btn.active-website {
+  border-color: var(--channel-website);
+  background: rgba(14, 165, 233, 0.1);
+  color: var(--channel-website);
 }
 
 /* ----- Modal ----- */
